@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lung Breathing Animation</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(ellipse at center, #1a1035 0%, #0d0820 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+      color: #e0d4f7;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      color: #c4aee8;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      color: #7a6a9a;
+      margin-bottom: 32px;
+    }
+
+    .animation-wrapper {
+      position: relative;
+      width: 340px;
+      height: 380px;
+    }
+
+    /* Glow behind the lungs */
+    .glow {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(180, 100, 140, 0.18) 0%, transparent 70%);
+      animation: glowPulse 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.6; transform: scale(0.95); }
+      50%       { opacity: 1;   transform: scale(1.08); }
+    }
+
+    #lottie-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Breath label */
+    .breath-label {
+      margin-top: 24px;
+      font-size: 1rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #c084fc;
+      height: 24px;
+      animation: labelCycle 5s ease-in-out infinite;
+    }
+
+    @keyframes labelCycle {
+      0%   { content: ''; }
+      0%,  100% { opacity: 0.4; }
+      25%  { opacity: 1; }
+      50%  { opacity: 1; }
+      75%  { opacity: 0.4; }
+    }
+
+    .breath-text {
+      display: inline-block;
+      animation: textCycle 5s ease-in-out infinite;
+    }
+
+    @keyframes textCycle {
+      0%, 4%   { content: 'exhale'; opacity: 0; }
+      8%       { opacity: 1; }
+      10%, 50% { opacity: 1; content: 'inhale'; }
+      55%      { opacity: 0; }
+      58%      { opacity: 0; }
+      62%      { opacity: 1; }
+      90%      { opacity: 1; }
+      95%, 100%{ opacity: 0; }
+    }
+
+    .controls {
+      margin-top: 28px;
+      display: flex;
+      gap: 16px;
+    }
+
+    button {
+      background: rgba(192, 132, 252, 0.12);
+      border: 1px solid rgba(192, 132, 252, 0.3);
+      color: #c084fc;
+      padding: 8px 24px;
+      border-radius: 24px;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: rgba(192, 132, 252, 0.25);
+      border-color: rgba(192, 132, 252, 0.6);
+    }
+
+    .speed-row {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.75rem;
+      color: #7a6a9a;
+      letter-spacing: 0.1em;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 120px;
+      height: 3px;
+      background: rgba(192,132,252,0.3);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #c084fc;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Lung Animation</h1>
+  <p class="subtitle">Inhale &nbsp;·&nbsp; Exhale</p>
+
+  <div class="animation-wrapper">
+    <div class="glow"></div>
+    <div id="lottie-container"></div>
+  </div>
+
+  <div class="breath-label">
+    <span class="breath-text" id="breathText">inhale</span>
+  </div>
+
+  <div class="controls">
+    <button id="btnPlay">Pause</button>
+    <button id="btnRestart">Restart</button>
+  </div>
+
+  <div class="speed-row">
+    <span>Slow</span>
+    <input type="range" id="speedSlider" min="0.3" max="2.5" step="0.1" value="1">
+    <span>Fast</span>
+  </div>
+
+  <script>
+    const animData = fetch('lung-animation.json')
+      .then(r => r.json())
+      .then(data => {
+        const anim = lottie.loadAnimation({
+          container: document.getElementById('lottie-container'),
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          animationData: data
+        });
+
+        // Breath label cycling: frames 0-75 inhale, 75-150 exhale
+        const totalFrames = 150;
+        anim.addEventListener('enterFrame', (e) => {
+          const f = e.currentTime;
+          const text = document.getElementById('breathText');
+          if (f < 75) {
+            text.textContent = 'Inhale';
+            text.style.opacity = 0.4 + 0.6 * (f / 75);
+          } else {
+            text.textContent = 'Exhale';
+            text.style.opacity = 1 - 0.6 * ((f - 75) / 75);
+          }
+        });
+
+        let playing = true;
+        document.getElementById('btnPlay').addEventListener('click', () => {
+          if (playing) { anim.pause(); document.getElementById('btnPlay').textContent = 'Play'; }
+          else         { anim.play();  document.getElementById('btnPlay').textContent = 'Pause'; }
+          playing = !playing;
+        });
+
+        document.getElementById('btnRestart').addEventListener('click', () => {
+          anim.goToAndPlay(0, true);
+          playing = true;
+          document.getElementById('btnPlay').textContent = 'Pause';
+        });
+
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+          anim.setSpeed(parseFloat(e.target.value));
+        });
+      });
+  </script>
+</body>
+</html>
