@@ -3,42 +3,371 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Test Claude Code Remotely</title>
+  <title>Lung Breathing Animation</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: #f0f4f8;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #0d0d1a 0%, #1a0a1a 50%, #0d0d1a 100%);
+      font-family: 'Arial', sans-serif;
     }
-    .card {
-      background: white;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      text-align: center;
+    .wrapper { text-align: center; }
+    h2 {
+      color: rgba(255, 180, 200, 0.85);
+      font-size: 15px;
+      letter-spacing: 6px;
+      font-weight: 300;
+      margin-bottom: 10px;
+      text-transform: uppercase;
     }
-    h1 { color: #2d3748; }
-    p { color: #718096; }
-    .badge {
-      display: inline-block;
-      background: #48bb78;
-      color: white;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      margin-top: 12px;
+    #breath-label {
+      font-size: 18px;
+      letter-spacing: 5px;
+      font-weight: 300;
+      margin-top: 14px;
+      text-transform: uppercase;
+      transition: color 0.6s ease;
+    }
+    .progress-bar {
+      width: 260px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1px;
+      margin: 10px auto 0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 1px;
+      width: 0%;
+    }
+
+    /* SVG group transforms */
+    #left-lung-group {
+      transform-box: fill-box;
+      transform-origin: right center;
+    }
+    #right-lung-group {
+      transform-box: fill-box;
+      transform-origin: left center;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Claude Code - Remote Test</h1>
-    <p>This app was created and pushed remotely by Claude Code.</p>
-    <span class="badge">✓ Successfully deployed</span>
+  <div class="wrapper">
+    <h2>Breathing Exercise</h2>
+
+    <svg id="lung-svg" viewBox="0 0 500 510" width="430" height="430" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Left lung gradient -->
+        <radialGradient id="lgL" cx="38%" cy="42%" r="68%" gradientUnits="objectBoundingBox">
+          <stop offset="0%"   stop-color="#f9c8d8"/>
+          <stop offset="40%"  stop-color="#e8789a"/>
+          <stop offset="80%"  stop-color="#cc4e72"/>
+          <stop offset="100%" stop-color="#a83058"/>
+        </radialGradient>
+        <!-- Right lung gradient -->
+        <radialGradient id="lgR" cx="62%" cy="42%" r="68%" gradientUnits="objectBoundingBox">
+          <stop offset="0%"   stop-color="#f9c8d8"/>
+          <stop offset="40%"  stop-color="#e8789a"/>
+          <stop offset="80%"  stop-color="#cc4e72"/>
+          <stop offset="100%" stop-color="#a83058"/>
+        </radialGradient>
+        <!-- Highlight overlay -->
+        <radialGradient id="hlL" cx="35%" cy="30%" r="55%">
+          <stop offset="0%"  stop-color="#fce4ec" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#fce4ec" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="hlR" cx="65%" cy="30%" r="55%">
+          <stop offset="0%"  stop-color="#fce4ec" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#fce4ec" stop-opacity="0"/>
+        </radialGradient>
+        <!-- Drop shadow -->
+        <filter id="shadow" x="-25%" y="-15%" width="150%" height="140%">
+          <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#c44070" flood-opacity="0.45"/>
+        </filter>
+        <!-- Soft inner glow on bronchi -->
+        <filter id="brGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- ===== LEFT LUNG ===== -->
+      <g id="left-lung-group">
+        <!-- Lung body -->
+        <path
+          d="M 242 188
+             C 238 168, 215 152, 180 150
+             C 138 148, 98 162, 70 192
+             C 42 222, 33 265, 36 308
+             C 39 352, 56 395, 86 425
+             C 110 449, 148 462, 182 458
+             C 214 454, 238 435, 245 405
+             C 252 372, 248 330, 246 285
+             C 244 242, 243 210, 242 188 Z"
+          fill="url(#lgL)"
+          filter="url(#shadow)"
+        />
+        <!-- Highlight -->
+        <path
+          d="M 242 188
+             C 238 168, 215 152, 180 150
+             C 138 148, 98 162, 70 192
+             C 42 222, 33 265, 36 308
+             C 39 352, 56 395, 86 425
+             C 110 449, 148 462, 182 458
+             C 214 454, 238 435, 245 405
+             C 252 372, 248 330, 246 285
+             C 244 242, 243 210, 242 188 Z"
+          fill="url(#hlL)"
+        />
+        <!-- Lung outline -->
+        <path
+          d="M 242 188
+             C 238 168, 215 152, 180 150
+             C 138 148, 98 162, 70 192
+             C 42 222, 33 265, 36 308
+             C 39 352, 56 395, 86 425
+             C 110 449, 148 462, 182 458
+             C 214 454, 238 435, 245 405
+             C 252 372, 248 330, 246 285
+             C 244 242, 243 210, 242 188 Z"
+          fill="none"
+          stroke="#b83868"
+          stroke-width="1.5"
+          opacity="0.6"
+        />
+
+        <!-- Bronchial tree - left lung -->
+        <g filter="url(#brGlow)" stroke="#a02858" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+          <!-- Main bronchus entering lung -->
+          <path d="M 240 202 C 228 218, 210 232, 196 252" stroke-width="5.5"/>
+          <!-- Upper lobe branch -->
+          <path d="M 210 232 C 196 220, 175 212, 156 216" stroke-width="3.5"/>
+          <path d="M 156 216 C 138 215, 118 222, 104 234" stroke-width="2.5"/>
+          <path d="M 156 216 C 152 204, 148 193, 145 183" stroke-width="2"/>
+          <path d="M 104 234 C 92 243, 82 253, 76 265" stroke-width="1.8"/>
+          <path d="M 145 183 C 140 174, 136 165, 133 156" stroke-width="1.5"/>
+          <!-- Lower lobe main -->
+          <path d="M 196 252 C 180 268, 162 280, 148 298" stroke-width="4.5"/>
+          <path d="M 196 252 C 200 272, 202 292, 202 314" stroke-width="3.5"/>
+          <!-- Lower lobe sub-branches left -->
+          <path d="M 148 298 C 132 318, 118 338, 106 360" stroke-width="3"/>
+          <path d="M 148 298 C 152 320, 154 342, 153 365" stroke-width="2.5"/>
+          <!-- Lower lobe sub-branches right -->
+          <path d="M 202 314 C 198 336, 195 358, 192 382" stroke-width="2.5"/>
+          <path d="M 202 314 C 210 334, 216 354, 220 375" stroke-width="2"/>
+          <!-- Terminal branches -->
+          <path d="M 106 360 C 96 376, 88 392, 83 408" stroke-width="1.8"/>
+          <path d="M 106 360 C 99 378, 94 395, 91 412" stroke-width="1.4"/>
+          <path d="M 153 365 C 145 382, 140 398, 137 415" stroke-width="1.8"/>
+          <path d="M 153 365 C 158 382, 162 398, 164 416" stroke-width="1.4"/>
+          <path d="M 192 382 C 186 398, 182 413, 179 428" stroke-width="1.5"/>
+          <path d="M 220 375 C 222 392, 223 408, 222 424" stroke-width="1.3"/>
+          <!-- Fine capillary branches -->
+          <path d="M 83 408 C 77 418, 73 428, 71 438" stroke-width="1"/>
+          <path d="M 91 412 C 86 422, 82 432, 80 442" stroke-width="0.9"/>
+          <path d="M 137 415 C 131 425, 126 434, 124 443" stroke-width="1"/>
+          <path d="M 164 416 C 164 426, 163 436, 162 446" stroke-width="0.9"/>
+          <path d="M 179 428 C 176 436, 174 443, 172 450" stroke-width="0.8"/>
+        </g>
+      </g>
+
+      <!-- ===== RIGHT LUNG ===== -->
+      <g id="right-lung-group">
+        <!-- Lung body -->
+        <path
+          d="M 258 188
+             C 262 168, 285 152, 320 150
+             C 362 148, 402 162, 430 192
+             C 458 222, 467 265, 464 308
+             C 461 352, 444 395, 414 425
+             C 390 449, 352 462, 318 458
+             C 286 454, 262 435, 255 405
+             C 248 372, 252 330, 254 285
+             C 256 242, 257 210, 258 188 Z"
+          fill="url(#lgR)"
+          filter="url(#shadow)"
+        />
+        <!-- Highlight -->
+        <path
+          d="M 258 188
+             C 262 168, 285 152, 320 150
+             C 362 148, 402 162, 430 192
+             C 458 222, 467 265, 464 308
+             C 461 352, 444 395, 414 425
+             C 390 449, 352 462, 318 458
+             C 286 454, 262 435, 255 405
+             C 248 372, 252 330, 254 285
+             C 256 242, 257 210, 258 188 Z"
+          fill="url(#hlR)"
+        />
+        <!-- Lung outline -->
+        <path
+          d="M 258 188
+             C 262 168, 285 152, 320 150
+             C 362 148, 402 162, 430 192
+             C 458 222, 467 265, 464 308
+             C 461 352, 444 395, 414 425
+             C 390 449, 352 462, 318 458
+             C 286 454, 262 435, 255 405
+             C 248 372, 252 330, 254 285
+             C 256 242, 257 210, 258 188 Z"
+          fill="none"
+          stroke="#b83868"
+          stroke-width="1.5"
+          opacity="0.6"
+        />
+
+        <!-- Bronchial tree - right lung (mirrored) -->
+        <g filter="url(#brGlow)" stroke="#a02858" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+          <!-- Main bronchus entering lung -->
+          <path d="M 260 202 C 272 218, 290 232, 304 252" stroke-width="5.5"/>
+          <!-- Upper lobe branch -->
+          <path d="M 290 232 C 304 220, 325 212, 344 216" stroke-width="3.5"/>
+          <path d="M 344 216 C 362 215, 382 222, 396 234" stroke-width="2.5"/>
+          <path d="M 344 216 C 348 204, 352 193, 355 183" stroke-width="2"/>
+          <path d="M 396 234 C 408 243, 418 253, 424 265" stroke-width="1.8"/>
+          <path d="M 355 183 C 360 174, 364 165, 367 156" stroke-width="1.5"/>
+          <!-- Lower lobe main -->
+          <path d="M 304 252 C 320 268, 338 280, 352 298" stroke-width="4.5"/>
+          <path d="M 304 252 C 300 272, 298 292, 298 314" stroke-width="3.5"/>
+          <!-- Lower lobe sub-branches right -->
+          <path d="M 352 298 C 368 318, 382 338, 394 360" stroke-width="3"/>
+          <path d="M 352 298 C 348 320, 346 342, 347 365" stroke-width="2.5"/>
+          <!-- Lower lobe sub-branches left -->
+          <path d="M 298 314 C 302 336, 305 358, 308 382" stroke-width="2.5"/>
+          <path d="M 298 314 C 290 334, 284 354, 280 375" stroke-width="2"/>
+          <!-- Terminal branches -->
+          <path d="M 394 360 C 404 376, 412 392, 417 408" stroke-width="1.8"/>
+          <path d="M 394 360 C 401 378, 406 395, 409 412" stroke-width="1.4"/>
+          <path d="M 347 365 C 355 382, 360 398, 363 415" stroke-width="1.8"/>
+          <path d="M 347 365 C 342 382, 338 398, 336 416" stroke-width="1.4"/>
+          <path d="M 308 382 C 314 398, 318 413, 321 428" stroke-width="1.5"/>
+          <path d="M 280 375 C 278 392, 277 408, 278 424" stroke-width="1.3"/>
+          <!-- Fine capillary branches -->
+          <path d="M 417 408 C 423 418, 427 428, 429 438" stroke-width="1"/>
+          <path d="M 409 412 C 414 422, 418 432, 420 442" stroke-width="0.9"/>
+          <path d="M 363 415 C 369 425, 374 434, 376 443" stroke-width="1"/>
+          <path d="M 336 416 C 336 426, 337 436, 338 446" stroke-width="0.9"/>
+          <path d="M 321 428 C 324 436, 326 443, 328 450" stroke-width="0.8"/>
+        </g>
+      </g>
+
+      <!-- ===== TRACHEA (rendered on top) ===== -->
+      <g id="trachea-group">
+        <!-- Main trachea tube -->
+        <rect x="236" y="38" width="28" height="140" rx="14" fill="#d4607a" stroke="#a83058" stroke-width="1.5"/>
+        <!-- Cartilage rings -->
+        <g stroke="#9a2850" stroke-width="1.8" fill="none" opacity="0.75">
+          <path d="M 237 55 Q 250 59 263 55"/>
+          <path d="M 237 68 Q 250 72 263 68"/>
+          <path d="M 237 81 Q 250 85 263 81"/>
+          <path d="M 237 94 Q 250 98 263 94"/>
+          <path d="M 237 107 Q 250 111 263 107"/>
+          <path d="M 237 120 Q 250 124 263 120"/>
+          <path d="M 237 133 Q 250 137 263 133"/>
+          <path d="M 237 146 Q 250 150 263 146"/>
+          <path d="M 237 159 Q 250 163 263 159"/>
+        </g>
+        <!-- Highlight on trachea -->
+        <rect x="239" y="42" width="8" height="130" rx="4" fill="rgba(255,200,210,0.3)"/>
+
+        <!-- Carina junction -->
+        <ellipse cx="250" cy="178" rx="9" ry="7" fill="#d4607a"/>
+        <!-- Left main bronchus connection -->
+        <path d="M 246 178 C 242 188, 240 194, 240 202"
+          stroke="#d4607a" stroke-width="11" fill="none" stroke-linecap="round"/>
+        <!-- Right main bronchus connection -->
+        <path d="M 254 178 C 258 188, 260 194, 260 202"
+          stroke="#d4607a" stroke-width="11" fill="none" stroke-linecap="round"/>
+        <!-- Cover the junction neatly -->
+        <ellipse cx="250" cy="178" rx="9" ry="7" fill="#d4607a"/>
+      </g>
+    </svg>
+
+    <div id="breath-label" style="color:#ffb3c6;">INHALE</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"
+        style="background: linear-gradient(90deg, #ff6b9d, #c44569);"></div>
+    </div>
   </div>
+
+  <script>
+    const leftGroup  = document.getElementById('left-lung-group');
+    const rightGroup = document.getElementById('right-lung-group');
+    const label      = document.getElementById('breath-label');
+    const bar        = document.getElementById('progress-fill');
+
+    const INHALE_MS   = 3200;
+    const HOLD_IN_MS  = 600;
+    const EXHALE_MS   = 3200;
+    const HOLD_OUT_MS = 600;
+    const TOTAL = INHALE_MS + HOLD_IN_MS + EXHALE_MS + HOLD_OUT_MS;
+
+    // Cubic ease-in-out
+    function ease(t) {
+      return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+    }
+
+    function applyExpansion(e) {
+      // e: 0 = fully exhaled, 1 = fully inhaled
+      const sx = 1 + e * 0.14;
+      const sy = 1 + e * 0.12;
+      const tx = e * 20;
+      const ty = e * 12;
+
+      // Left lung expands to the left
+      leftGroup.style.transform  = `translate(${-tx}px, ${ty}px) scale(${sx}, ${sy})`;
+      // Right lung expands to the right
+      rightGroup.style.transform = `translate(${tx}px, ${ty}px) scale(${sx}, ${sy})`;
+    }
+
+    let startTs = null;
+
+    function frame(ts) {
+      if (!startTs) startTs = ts;
+      const elapsed = (ts - startTs) % TOTAL;
+
+      if (elapsed < INHALE_MS) {
+        const t   = elapsed / INHALE_MS;
+        const exp = ease(t);
+        applyExpansion(exp);
+        bar.style.width = (exp * 100) + '%';
+        bar.style.background = 'linear-gradient(90deg, #ff6b9d, #c44569)';
+        label.textContent  = 'INHALE';
+        label.style.color  = '#ffb3c6';
+
+      } else if (elapsed < INHALE_MS + HOLD_IN_MS) {
+        applyExpansion(1);
+        bar.style.width = '100%';
+        label.textContent = 'HOLD';
+        label.style.color = '#ffffff';
+
+      } else if (elapsed < INHALE_MS + HOLD_IN_MS + EXHALE_MS) {
+        const t   = (elapsed - INHALE_MS - HOLD_IN_MS) / EXHALE_MS;
+        const exp = 1 - ease(t);
+        applyExpansion(exp);
+        bar.style.width = (exp * 100) + '%';
+        bar.style.background = 'linear-gradient(90deg, #b06dcc, #7b4f99)';
+        label.textContent = 'EXHALE';
+        label.style.color = '#d4a8e8';
+
+      } else {
+        applyExpansion(0);
+        bar.style.width = '0%';
+        label.textContent = 'REST';
+        label.style.color  = '#7090c0';
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  </script>
 </body>
 </html>
